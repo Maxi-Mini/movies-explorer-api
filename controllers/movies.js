@@ -46,32 +46,31 @@ const createMovie = (req, res, next) => {
       } else {
         next(err);
       }
-    });
+    })
+    .catch(next);
 };
 
 const deleteMovie = (req, res, next) => {
-  Movie.findById(req.params.id).then((movie) => {
-    if (!movie) {
-      next(new NotFoundError('Фильм с таким _id не найдена'));
-    }
-    if (movie.owner._id.toString() !== req.user._id) {
-      next(new ForbiddenError('Нельзя удалять фильмы других пользователей'));
-    }
-    Movie.findByIdAndRemove(req.params.id)
-      // eslint-disable-next-line no-shadow
-      .then((movie) => {
-        res.send(movie);
-      })
-      .catch((err) => {
-        if (err.name === 'CastError') {
-          next(new BadRequestError('Неправильный id'));
-        } else {
-          next(err);
-        }
-      });
-  });
+  Movie.findById(req.params.id)
+    .orFail(new NotFoundError('Фильм с таким _id не найден'))
+    .then((movie) => {
+      if (movie.owner._id.toString() === req.user._id) {
+        return movie.remove().then(() => res.send(movie));
+      }
+      throw new ForbiddenError('Нельзя удалять фильмы других пользователей');
+    })
+    .catch((err) => {
+      if (err.kind === 'ObjectId') {
+        next(new BadRequestError('Неправильный id'));
+      } else {
+        next(err);
+      }
+    })
+    .catch(next);
 };
 
 module.exports = {
-  getMovies, createMovie, deleteMovie,
+  getMovies,
+  createMovie,
+  deleteMovie,
 };

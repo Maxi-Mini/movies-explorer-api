@@ -40,10 +40,13 @@ const updateUser = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         next(new BadRequestError('Переданы некорректные данные'));
+      } else if (err.code === 11000) {
+        next(new ConflictError('Такой пользователь уже существует'));
       } else {
         next(err);
       }
-    });
+    })
+    .catch(next);
 };
 
 const login = (req, res, next) => {
@@ -77,13 +80,13 @@ const createUser = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные'));
-      }
-      if (err.code === 11000) {
+      } else if (err.code === 11000) {
         next(new ConflictError('Такой пользователь уже существует'));
       } else {
         next(err);
       }
-    });
+    })
+    .catch(next);
 };
 
 module.exports = {
