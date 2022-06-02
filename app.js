@@ -9,31 +9,8 @@ const { requestLogger, errorLogger } = require('./middlewares/Logger');
 const ServerError = require('./middlewares/ServerError');
 const limiter = require('./middlewares/limiter');
 
-const { PORT = 3000, NODE_ENV, MONGO = 'mongodb://localhost:27017/moviesdb' } = process.env;
+const { PORT = 3002, NODE_ENV, MONGO = 'mongodb://localhost:27017/moviesdb' } = process.env;
 const app = express();
-
-const allowedDomains = [
-  'https://diploma.frontend.nomoredomains.xyz',
-  'http://diploma.frontend.nomoredomains.xyz',
-  'http://localhost:3000',
-];
-
-app.use((req, res, next) => {
-  const { origin } = req.headers;
-  if (allowedDomains.includes(origin)) {
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header('Access-Control-Allow-Origin', origin);
-    const { method } = req;
-    const DEFAULT_ALLOWED_METHODS = 'GET,PUT,PATCH,POST,DELETE';
-    if (method === 'OPTIONS') {
-      const requestHeaders = req.headers['access-control-request-headers'];
-      res.header('Access-Control-Allow-Methods', DEFAULT_ALLOWED_METHODS);
-      res.header('Access-Control-Allow-Headers', requestHeaders);
-    }
-  }
-  next();
-});
-
 mongoose
   .connect(NODE_ENV === 'production' ? MONGO : 'mongodb://localhost:27017/moviesdb', {
     useNewUrlParser: true,
