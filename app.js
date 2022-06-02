@@ -9,7 +9,7 @@ const { requestLogger, errorLogger } = require('./middlewares/Logger');
 const ServerError = require('./middlewares/ServerError');
 const limiter = require('./middlewares/limiter');
 
-const { PORT = 3000, NODE_ENV, MONGO = 'mongodb://localhost:27017/moviesdb' } = process.env;
+const { PORT = 3001, NODE_ENV, MONGO = 'mongodb://localhost:27017/moviesdb' } = process.env;
 const app = express();
 
 mongoose
@@ -20,9 +20,10 @@ mongoose
   .then(() => console.log('mongo connected'))
   .catch((err) => console.log(err));
 
+app.use(cors());
 app.use(requestLogger);
 app.use(limiter);
-app.use(cors());
+
 app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
