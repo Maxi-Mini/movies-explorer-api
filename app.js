@@ -1,17 +1,23 @@
 require('dotenv').config();
 const express = require('express');
-// const cors = require('cors');
+const cors = require('cors');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
-const cors = require('./middlewares/cors');
 const { requestLogger, errorLogger } = require('./middlewares/Logger');
 const ServerError = require('./middlewares/ServerError');
 const limiter = require('./middlewares/limiter');
 
-const { PORT = 3001, NODE_ENV, MONGO = 'mongodb://localhost:27017/moviesdb' } = process.env;
+const { PORT = 3000, NODE_ENV, MONGO = 'mongodb://localhost:27017/moviesdb' } = process.env;
 const app = express();
+
+const corsOptions = {
+  origin: '*',
+  optionsSuccessStatus: 204,
+};
+
+app.use(express.json(), cors(corsOptions));
 
 mongoose
   .connect(NODE_ENV === 'production' ? MONGO : 'mongodb://localhost:27017/moviesdb', {
@@ -20,11 +26,10 @@ mongoose
   })
   .then(() => console.log('mongo connected'))
   .catch((err) => console.log(err));
-app.use(cors);
 
 app.use(requestLogger);
 app.use(limiter);
-
+app.use(cors());
 app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
