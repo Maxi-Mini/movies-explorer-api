@@ -13,8 +13,6 @@ const limiter = require('./middlewares/limiter');
 const { PORT = 3001, NODE_ENV, MONGO = 'mongodb://localhost:27017/moviesdb' } = process.env;
 const app = express();
 
-app.use(cors);
-
 mongoose
   .connect(NODE_ENV === 'production' ? MONGO : 'mongodb://localhost:27017/moviesdb', {
     useNewUrlParser: true,
@@ -22,6 +20,7 @@ mongoose
   })
   .then(() => console.log('mongo connected'))
   .catch((err) => console.log(err));
+app.use(cors);
 
 app.use(requestLogger);
 app.use(limiter);
